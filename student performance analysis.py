@@ -116,7 +116,7 @@ plt.close()
 # Figure 2: Numerical Feature Distributions
 num_cols = ['study_hours_per_day', 'attendance_percentage', 'assignment_score',
             'midterm_score', 'final_exam_score', 'participation_score',
-            'sleep_hours', 'overall_score']
+            'sleep_hours']
 fig, axes = plt.subplots(2, 4, figsize=(16, 8))
 axes = axes.flatten()
 for i, col in enumerate(num_cols):
@@ -124,6 +124,8 @@ for i, col in enumerate(num_cols):
     axes[i].set_title(col.replace('_', ' ').title(), fontsize=10)
     axes[i].set_xlabel('Value')
     axes[i].set_ylabel('Frequency')
+for j in range(len(num_cols), len(axes)):
+    axes[j].axis('off')
 plt.suptitle('Numerical Feature Distributions', fontsize=14, fontweight='bold', y=1.01)
 plt.tight_layout()
 plt.savefig(FIGURES_DIR + '/02_feature_distributions.png', dpi=150, bbox_inches='tight')
@@ -138,6 +140,8 @@ for i, col in enumerate(num_cols):
     axes[i].set_title(col.replace('_', ' ').title(), fontsize=9)
     axes[i].set_xlabel('Grade')
     axes[i].set_ylabel('')
+for j in range(len(num_cols), len(axes)):
+    axes[j].axis('off')
 plt.suptitle('Feature Distribution by Grade', fontsize=14, fontweight='bold')
 plt.tight_layout()
 plt.savefig(FIGURES_DIR + '/03_boxplots_by_grade.png', dpi=150, bbox_inches='tight')
@@ -224,7 +228,7 @@ for g, c in zip(le_grade.classes_, np.bincount(y)):
 
 # Outlier detection and report (IQR method)
 print("\nOutlier Analysis (IQR method):")
-for col in num_cols[:-1]:  # exclude overall_score
+for col in num_cols:
     Q1 = df[col].quantile(0.25)
     Q3 = df[col].quantile(0.75)
     IQR = Q3 - Q1
@@ -509,7 +513,6 @@ def encode_student(raw: dict) -> np.ndarray:
         extra_classes       : 'Yes' | 'No'
         parent_education    : 'High School' | 'Bachelor' | 'Master' | 'PhD'
         sleep_hours         : float  (4.0 – 9.0)
-        overall_score       : float  (weighted composite)
     """
     gender_map      = {'Female': 0, 'Male': 1}
     internet_map    = {'No': 0, 'Yes': 1}
@@ -524,7 +527,6 @@ def encode_student(raw: dict) -> np.ndarray:
         raw['final_exam_score'],
         raw['participation_score'],
         raw['sleep_hours'],
-        raw['overall_score'],
         gender_map[raw['gender']],
         internet_map[raw['internet_access']],
         extra_map[raw['extra_classes']],
@@ -550,7 +552,6 @@ new_students = [
         'extra_classes': 'Yes',
         'parent_education': 'Master',
         'sleep_hours': 7.0,
-        'overall_score': 83.9,   # 0.3*78 + 0.4*88 + 0.2*85 + 0.1*70
     },
     {
         'name': 'Sara Ali',
@@ -565,7 +566,6 @@ new_students = [
         'extra_classes': 'No',
         'parent_education': 'High School',
         'sleep_hours': 5.0,
-        'overall_score': 31.9,   # 0.3*30 + 0.4*32 + 0.2*35 + 0.1*15
     },
     {
         'name': 'Omar Hassan',
@@ -580,7 +580,6 @@ new_students = [
         'extra_classes': 'No',
         'parent_education': 'Bachelor',
         'sleep_hours': 6.5,
-        'overall_score': 63.3,   # 0.3*60 + 0.4*67 + 0.2*65 + 0.1*55
     },
 ]
 
@@ -605,7 +604,6 @@ for student in new_students:
 
 print("\n[INFO] Prediction complete.")
 print("[TIP]  To predict your own student, edit the 'new_students' list above.")
-print("       Make sure 'overall_score' = 0.3*midterm + 0.4*final + 0.2*assignment + 0.1*participation")
 import joblib
 
 joblib.dump(best_model, os.path.join(DATA_DIR, "model.pkl"))
